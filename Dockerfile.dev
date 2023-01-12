@@ -1,0 +1,26 @@
+FROM node:16-alpine
+
+ENV TZ=Asia/Seoul
+
+RUN apk --no-cache add tzdata && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone \
+    apk del tzdata
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+RUN chown -R node:node *
+
+USER node
+
+EXPOSE 3000
+
+CMD [ "/app/node_modules/.bin/nest", "start" ]
